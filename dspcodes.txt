@@ -1,0 +1,698 @@
+clc
+clear all
+n=-5:1:5;
+u_i=(n==0);
+u_s=(n>=0);
+u_r=(n.*u_s);
+
+subplot(3,1,1);
+stem(n,u_i);
+xlabel('Time index[n]');
+ylabel('\delta[n]');
+title('Unit Impulse Signal');
+
+subplot(3,1,2);
+stem(n,u_s);
+xlabel('Time index[n]');
+ylabel('u[n]');
+title('Unit Step Signal');
+
+subplot(3,1,3);
+stem(n,u_r);
+xlabel('Time index[n]');
+ylabel('r[n]');
+title('Unit Ramp Signal');
+
+alpha=[0.5 2 -0.5 -2];
+figure;
+for i=1:length(alpha)
+    y(i,:)=alpha(i).^n;
+    subplot(2,2,i);
+    stem(n,y(i,:));
+    xlabel('time index');
+    ylabel('\alpha')
+end
+
+
+//////////////////////////// ////////////////////////        1B   Opertaions on discrete time signals  ////////////////////////////////
+
+l=-2 %input('Enter the lower time index');
+u=2 %input('Enter the upper time index');
+n = l : 1 : u
+
+x =[0,-1,0,1,0]
+
+///// Reversal ///////
+
+y = fliplr(x);
+n1 = -fliplr(n);
+
+figure;
+subplot(1,2,1);
+stem(n,x, 'color' ,'r');
+xlabel('time index');
+ylabel('x[n]');
+title('input sequence');
+
+subplot(1,2,2);
+stem(n1,y);
+xlabel('time index');
+ylabel('y[n]');
+title('fliped sequence');
+
+
+///////  Time shifting  /////////
+
+
+s = 1 
+% s>0 is delay moves forward
+% s<0 is moves backward 
+
+n1 = n+s;
+figure;
+subplot(1,2,1);
+stem(n,x, 'color' ,'r');
+xlabel('time index');
+ylabel('x[n]');
+title('input sequence');
+
+subplot(1,2,2);
+stem(n1,x, 'color' ,'g');
+xlabel('time index');
+ylabel('x[n]');
+title('shifted signal');
+
+
+/////// Upscaling /////////
+
+l=-1
+u=1
+n=l:1:u
+x=[-1,2,-3]
+
+I=input('Enter scaling factor');
+n1=(l*I):(u*I);
+y=zeros(1,length(n1));
+count=1;
+for i=1:I:length(n1)
+    y(i)=x(count);
+    count=count+1;
+end
+
+subplot(1,2,1);
+stem(n,x, 'color' ,'r');
+xlabel('time index');
+ylabel('x[n]');
+title('input sequence');
+
+subplot(1,2,2);
+stem(n1,y);
+xlabel('time index');
+ylabel('y[n/2]');
+title('output sequence');
+
+
+//////// DownScaling ///////////
+
+l = input('Enter the lower time index: ');
+u = input('Enter the upper time index: ');
+n = l : 1 : u %time index
+x = input('Enter sample values for each n: ');
+D = input('Enter the down scaling factor: ');
+
+figure;
+subplot(2,1,1);                                        
+stem(n,x);
+xlabel('time index ');
+ylabel('Amplitude');
+title('Original Signal');
+
+n1 = n/D;
+y = x(find(floor(n1) == n1));
+nd = n1(find(floor(n1) == n1));
+subplot(2,1,2);                                        
+stem(nd,y);
+xlabel('time index ');
+ylabel('Amplitude');
+title('Down Scaled Signal');
+
+
+
+////////////////////////////////////////////////       2A Linear Convulation     ///////////////////////////////////////////////////////
+clc
+clear all
+close all
+
+%linear convolution of discrete time signals
+
+l1 = input('Enter the lower time index for x[n]: ');
+u1 = input('Enter the upper time index for x[n]: ');
+n1 = l1 : 1 : u1 %time index
+x = input('Enter sample values for each x[n]: '); %enter the sequence in [] as it is matrix
+
+l2 = input('Enter the lower time index for h[n]: ');
+u2 = input('Enter the upper time index for h[n]: ');
+n2 = l2 : 1 : u2 %time index
+h = input('Enter sample values for each h[n]: '); %enter the sequence in [] as it is matrix
+
+
+n3 = (l1+l2) : 1 : (u1+u2);
+L = length(x);
+M = length(h);
+n = L+M -1;
+
+if L>=M
+    H = [h, zeros(1,L-M)];
+    X = x;
+else
+    X = [x, zeros(1, M-L)];
+    H =h;
+end
+
+for i=1 : length(X)
+    for j=1 : length(H)
+        w(i,j) = X(i) * H(j);
+    end
+end
+
+y = zeros(1,n);
+for k=1 : n
+    for i=1 : length(X)
+        for j=1 : length(H)
+            if(i+j == k+1)
+                y(k) = y(k) + w(i,j);
+            end
+        end
+    end
+end
+
+figure;
+subplot(3,1,1);                                        
+stem(n1,x);
+xlabel('time index ');
+ylabel('Amplitude');
+title('x[n]');
+
+subplot(3,1,2);                                        
+stem(n2,h);
+xlabel('time index ');
+ylabel('Amplitude');
+title('h[n]');
+
+subplot(3,1,3);                                        
+stem(n3,y);
+xlabel('time index ');
+ylabel('Amplitude');
+title('Convoluted Signal');
+
+///////////////////////////////////////////////                  2B Correlation              //////////////////////////////////////////////////
+
+clc
+clear all
+close all
+
+%linear convolution of discrete time signals
+
+l1 = input('Enter the lower time index for x[n]: ');
+u1 = input('Enter the upper time index for x[n]: ');
+n1 = l1 : 1 : u1 %time index
+x = input('Enter sample values for each x[n]: '); %enter the sequence in [] as it is matrix
+
+l2 = input('Enter the lower time index for h[n]: ');
+u2 = input('Enter the upper time index for h[n]: ');
+n2 = l2 : 1 : u2 %time index
+p = input('Enter sample values for each h[n]: '); %enter the sequence in [] as it is matrix
+
+h=fliplr(p);
+
+n3 = (l1-u2) : 1 : (u1-l2);%cross corr
+n4 = (l1-u1) : 1 : (u1-l1);%auto corr
+
+L = length(x);
+M = length(h);
+n = L+M -1;
+
+if L>=M
+    H = [h, zeros(1,L-M)];
+    X = x;
+else
+    X = [x, zeros(1, M-L)];
+    H = h;
+end
+
+for i=1 : length(X)
+    for j=1 : length(H)
+        w(i,j) = X(i) * H(j);
+    end
+end
+
+y = zeros(1,n);
+for k=1 : n
+    for i=1 : length(X)
+        for j=1 : length(H)
+            if(i+j == k+1)
+                y(k) = y(k) + w(i,j);
+            end
+        end
+    end
+end
+
+y1=xcorr(x,x)
+
+figure;
+subplot(3,1,1);                                        
+stem(n1,x);
+xlabel('time index ');
+ylabel('Amplitude');
+title('x[n]');
+
+subplot(3,1,2);                                        
+stem(n2,p);
+xlabel('time index ');
+ylabel('Amplitude');
+title('h[n]');
+
+subplot(3,1,3);                                        
+stem(n3,y);
+xlabel('time index ');
+ylabel('Amplitude');
+title('Cross-Correlated Signal');
+
+figure(2)
+subplot(4,1,1);
+stem(n4,y1);
+xlabel('time index ');
+ylabel('Amplitude');
+title('Auto-Correlated Signal');
+
+/////////////////////////////////////////////////////////    3A  Circular Convolution    /////////////////////////////////////////////////////////
+clc
+clear all
+close all
+
+%circular convolution can be calculated using 2 methods
+%1. concentric circle
+%2. matrix multiplication 
+
+%x1 = input('Enter sample values for each x1[n]: '); %enter the sequence in [] as it is matrix
+%x2 = input('Enter sample values for each x2[n]: '); %enter the sequence in [] as it is matrix
+
+x1=[1,2,3,4]
+x2=[-1,3,-5,3]
+
+
+L1 = length(x1);
+L2 = length(x2);
+L = max(L1,L2);
+
+%zero padding to match length
+x1 = [x1 zeros(1,L-L1)]'; %' transpose
+x2 = [x2 zeros(1,L-L2)]'; %' transpose
+
+for i=1:L
+    c(:,i) = circshift(x2,i-1); % filling the matrix coloumn wise.
+end
+
+x3 = c*x1; % matrix multiplication
+x3
+n1 = 0 : 1 : L1-1;
+n2 = 0 : 1 : L2-1;
+n3 = 0 :1 : L-1;
+
+figure
+subplot(3,1,1);
+stem(n1,x1);
+title('x1[n]');
+xlabel('time index');
+ylabel('Amplitude');
+
+subplot(3,1,2);
+stem(n2,x2);
+title('x2[n]');
+xlabel('time index');
+ylabel('Amplitude');
+
+subplot(3,1,3);
+stem(n3,x3);
+title('Circlular Convoluted Signal');
+xlabel('time index');
+ylabel('Amplitude');
+
+
+////////////////////////////////////////////////////  3B DFT spectrum analysis  ////////////////////////////////////////////////////
+
+clc
+clear all
+close all
+x = input('Enter input values fox x')
+L = length(x)
+N = input('Enter number of DFT points')
+n1 = 0:L-1
+k1 = 0 : N-1
+if (N<L)
+    error('N muns be greater >= L')
+end
+Xk = zeros(1,N);
+for k = 0 : N-1
+    for n = 0 : N-1
+        Xk(k+1) = Xk(k+1) + x(n+1)*exp((-i*2*pi*k*n)/N);
+    end
+end
+disp('DFT coefficients')
+m = abs(Xk)
+p = (angle(Xk)*180)/pi
+ix=zeros(1,N)
+
+for n=0:N-1
+    for k = 0:N-1
+        ix(n+1)=ix(n+1)+Xk(k+1)*exp(i*2*pi*k*n/N);
+    end
+end
+
+disp('IDFT of x[k]')
+ix=ix./N
+
+figure
+subplot(2,2,1)
+stem(n1,x)%inp seq
+title('input squence')
+xlabel('')
+ylabel('')
+
+subplot(2,2,2)
+stem(k1,m)%mag spec of x[k]
+title('magnitude spectrum of x[k]')
+xlabel('')
+ylabel('')
+
+subplot(2,2,3)
+stem(k1,p)% diff freq sample points vs angle 
+title('differnet frequency sample points vs angles')
+xlabel('')
+ylabel('')
+
+subplot(2,2,4)
+stem(n1,x)
+%stem(n1,real(ix))
+title('idft')
+
+////////////////////////////////////////////           4 dtft spectrum          ///////////////////////////////////////////
+clc
+clear all
+close all
+x=[1,2,3,4,5];
+n=0:length(x)-1;
+
+syms w;
+W=exp(-1i*n*w);
+X=x*transpose(W);
+w=-pi:0.001:pi;
+y=eval(X);
+mag=abs(y);
+phase=angle(y)*180/pi;
+
+figure
+subplot(2,1,1);
+plot(w,mag);
+subplot(2,1,2);
+plot(w,phase);
+
+
+////////////////////////////////////////        5  Analog filter design ////////////////////////////////////////
+
+////////////butterworth///////////////////
+
+clc
+clear all
+%Ap = input('enter passband ripple in dB');
+%As = input('stop band attenutation in dB');
+%wp = input('pass band edge freq in rad/sec');
+%ws = input('stop band edge freq in rad/sec');
+
+
+Ap=3;As=20;
+wp_l=30;ws_l=50;%LPF
+wp_h=50;ws_h=30;%HPF
+
+% BUTTERWORTH FILTER DESIGN
+
+[N,wc] = buttord(wp_l,ws_l,Ap,As,'s');%analog butterworth filter design
+[b,a] = butter(N,wc,"low",'s');%LPF butterworth
+[d,c] = butter(N,wc,"high",'s')%HPF butterworth
+
+wa_l = 0:0.01:3*ws_l;
+wa_h = 0:0.01:3*wp_h;
+
+hb_lpf = freqs(b,a,wa_l);  % H(jw)
+magb_lpf= 20*log10(abs(hb_lpf)); % |H(jw)|
+
+hb_hpf = freqs(d,c,wa_h);
+magb_hpf = 20*log10(abs(hb_hpf));
+
+figure
+%LPF butterworth
+plot(wa_l,magb_lpf);
+xlabel('\Omega');
+ylabel('|H_a(j\Omega)|');
+title('Magnitude response of butterworth LPF');
+
+figure
+%HPf butterworth
+plot(wa_h,magb_hpf);
+xlabel('\Omega');
+ylabel('|H_a(j\Omega)|');
+title('Magnitude response of butterworth HPF');
+
+////////////////////////////// chebyshev ///////////////////////////////
+clc
+clear all
+%Ap = input('enter passband ripple in dB');
+%As = input('stop band attenutation in dB');
+%wp = input('pass band edge freq in rad/sec');
+%ws = input('stop band edge freq in rad/sec');
+
+
+Ap=3;As=20;
+wp_l=30;ws_l=50;%LPF
+wp_h=50;ws_h=30;%HPF
+
+% CHEBYSHEV FILTER DESIGN
+
+[N,wp_l] = cheb1ord(wp_l,ws_l,Ap,As,'s');%analog chebyshev filter design
+[b,a] = cheby1(N,Ap,wp_l,"low",'s');%LPF chebyshev
+[d,c] = cheby1(N,Ap,wp_h,"high",'s')%HPF chebyshev
+
+wa_l = 0:0.01:3*ws_l;
+wa_h = 0:0.01:3*wp_h;
+
+hb_lpf = freqs(b,a,wa_l);  % H(jw)
+magb_lpf= 20*log10(abs(hb_lpf)); % |H(jw)|
+
+hb_hpf = freqs(d,c,wa_h);
+magb_hpf = 20*log10(abs(hb_hpf));
+
+figure
+%LPF butterworth
+plot(wa_l,magb_lpf);
+xlabel('\Omega');
+ylabel('|H_a(j\Omega)|');
+title('Magnitude response of chebyshev LPF');
+
+figure
+%HPf butterworth
+plot(wa_h,magb_hpf);
+xlabel('\Omega');
+ylabel('|H_a(j\Omega)|');
+title('Magnitude response of chebyshev HPF');
+
+/////////////////////////////////////////////////////////// 6  Digital IIR filter ///////////////////////////////////////////////////////////
+///////////////////////////low pass butterworth///////////////////////
+clc
+clear all
+close all
+
+t=1;
+fs=1/t;
+
+alphas=14 %input('enter the allowable stop band gain');
+alphap=2 %input('enter the allowable pass band gain');
+
+ompi=0.2*pi;%input('enter the pass band freq');
+omsi=0.6*pi;%input('enter the stop band freq');
+
+omp=(2/t)*tan((ompi*t)/2);
+oms=(2/t)*tan((omsi*t)/2);
+
+[n,wn]=buttord(omp,oms,alphap,alphas,'s');
+
+disp('order of the filter n=');
+disp(n);
+
+[num,den]=butter(n,wn,'low','s');
+
+disp('num polynomials')
+disp(num);
+
+disp('den poly');
+disp(den);
+
+[b,a]=bilinear(num,den,fs);
+
+disp('coeff of bz');
+disp(b);
+
+disp('coeff of az');
+disp(a);
+
+w=0:0.1:pi;
+[h,om]=freqz(b,a,w);
+m=20*log(abs(h));
+an=angle(h);
+
+subplot(2,1,1);
+plot(om/pi,m);
+ylabel('Gain(in dB');
+xlabel('Normalised Frequency');
+
+subplot(2,1,2);
+plot(om/pi,an);
+xlabel('Normalised Frequency');
+ylabel('Phase(in radians)')
+
+
+/////////////////////////////////////                      7 FIR LOW pass                 ////////////////////////////////////////////
+clc;
+close all;
+clear all;
+wc=input ('Enter Cutoff Frequency');%pi/2
+N=input ('Enter length of FIR filter');%m=11
+al=(N-1)/2;
+n=0:1:N-1;
+%Equation of Low pass filter in time domain 
+for i=1:length(n)
+    if n(i)==al
+        hd (i)=wc/pi;
+    else hd (i)=sin (wc* (n (i) -al))./(pi* (n(i) -al));
+    end
+end 
+hd
+%Generating rectangular window of size N 
+wr=bartlett(N)
+hn=hd.*wr'
+w=0:0.01 :pi;
+h=freqz(hn, 1, w);
+m=20*log10 (abs (h)) ;
+plot (w/pi, m)
+ylabel ('Gain (in dB) ');
+xlabel ('Normalised frequency');
+title ('FIR Low Pass Filter using bartlett Window');
+grid on;
+////////////////////////////////////                      8 FIR HIGH pass                   /////////////////////////////////////////////////////
+clc;
+close all;
+clear all;
+omgc=input ('Enter Cutoff Frequency');%pi/2
+N=input ('Enter length of FIR filter');%m=11
+al=(N-1)/2;
+n=0:1:N-1;
+%Equation of Low pass filter in time domain 
+for i=1:length(n)
+    if n(i)==al
+        hd (i)=1-omgc/pi;
+    else hd (i)= (sin(pi*(n(i)-al))-sin(omgc*(n(i)-al)))/(pi*(n(i)-al));
+    end
+end 
+hd
+%Generating rectangular window of size N 
+wb=bartlett(N);
+wr=rectwin(N);
+wh=hamming(N);
+wn=hann(N);
+
+hnr=hd.*wr';
+hnb=hd.*wb';
+hnh=hd.*wh';
+hnhn=hd.*wn';
+
+w=0:0.01 :pi;
+
+h1=freqz(hnr, 1, w);
+h2=freqz(hnb,1,w);
+h3=freqz(hnh,1,w);
+h4=freqz(hnhn,1,w);
+
+m1=20*log10 (abs (h1)) ;
+m2=20*log10 (abs (h2)) ;
+m3=20*log10 (abs (h3)) ;
+m4=20*log10 (abs (h4)) ;
+
+plot (w/pi, m1,'k-')
+hold on;
+plot (w/pi, m2,'r-')
+hold on;
+plot (w/pi, m3,'b-')
+hold on;
+plot (w/pi, m4,'g-')
+hold on;
+
+ylabel ('Gain (in dB) ');
+xlabel ('Normalised frequency');
+title ('FIR High pass filter windowing');
+grid on;
+legend('A','B','C','D');
+
+///////////////////////////////////  10 Upsampling Interpolation /////////////////////////////////////////
+clc
+clear all;
+close all;
+N=20%input('Enter the length of the sequence');
+n=0:N-1;
+L=3%input('Enter the integer factor for upsampling');
+x=sin(2*pi*0.12*n);
+y=zeros(1,L*length(x));
+y([1:L:length(y)])=x;
+n1=0:length(y)-1;
+subplot(3,1,1);
+stem(n,x);
+title('input sequence');
+xlabel('n');
+ylabel('x[n]');
+subplot(3,1,2);
+stem(n1,y);
+title('upsampled output sequence');
+xlabel('n');
+ylabel('xu[n]');
+y1=interp(x,L);
+subplot(3,1,3);
+m=0:(N*L)-1;
+stem(m,y1(1:(N*L))); 
+title('interpolated Output Sequence');
+xlabel('n');ylabel('xi[n]');
+
+///////////////////////////////////////////// 10 downsampling Decimation /////////////////////////////////////////////
+clc
+clear all;
+close all;
+N=25%input('Enter the length of the sequence');
+n=0:N-1;
+L=3%input('Enter the integer factor for downsampling');
+x=sin(2*pi*0.12*n);
+y=zeros(1,L*length(x));
+y=x([1:L:length(x)])
+n1=0:length(y)-1;
+subplot(3,1,1);
+stem(n,x);
+title('input sequence');
+xlabel('n');
+ylabel('x[n]');
+subplot(3,1,2);
+stem(n1,y);
+title('downsampled output sequence');
+xlabel('n');
+ylabel('xu[n]');
+y1=decimate(x,L);
+subplot(3,1,3);
+m=0:(N/L)-1;
+stem(m,y1(1:round(N/L)));
+title('decimated Output Sequence');
+xlabel('n');ylabel('xi[n]');
